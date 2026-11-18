@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flockbook Style Preview</title>
+<style>
+  :root {
+    --canvas:#202020; --chrome:#1c1c1c; --raised:#262626; --hover:#2e2e2e; --selected:#383838;
+    --border:#363636; --muted:#9a9a9a; --dim:#707070; --accent:#ededed;
+    --working:#9a9a9a; --done:#ededed; --blocked:#ededed; --fg:#ededed;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--canvas); color: var(--fg);
+    font: 13px/1.55 "Maple Mono NF CN", ui-monospace, SFMono-Regular, Menlo, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { display: flex; height: 100vh; }
+  .side {
+    width: 250px; min-width: 220px; background: var(--chrome);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  }
+  .side-head { padding: 16px 14px 10px; display: flex; justify-content: space-between; align-items: center; }
+  .side-head b { font-weight: 600; letter-spacing: .02em; }
+  .side-head span { color: var(--dim); font-size: 11px; }
+  .row { padding: 9px 14px; display: flex; align-items: center; gap: 9px; }
+  .row:hover { background: var(--hover); }
+  .row.sel { background: var(--selected); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+  .dot.working { background: var(--working); }
+  .dot.done { background: var(--done); }
+  .dot.blocked { background: var(--blocked); }
+  .row .name { flex: 1; }
+  .row .tag { color: var(--dim); font-size: 11px; }
+  .side-foot { margin-top: auto; padding: 12px 14px; color: var(--dim); font-size: 11px; border-top: 1px solid var(--border); }
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .tabs { display: flex; gap: 2px; padding: 10px 16px 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 6px 12px; color: var(--muted); border-bottom: 1px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+  .msgs { flex: 1; overflow: hidden; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; }
+  .bubble { max-width: 76%; background: var(--raised); border: 1px solid var(--border); padding: 10px 12px; }
+  .bubble.me { align-self: flex-end; }
+  .meta { color: var(--dim); font-size: 11px; margin-bottom: 4px; }
+  .composer {
+    margin: 0 24px 18px; border: 1px solid var(--border); background: var(--raised);
+    padding: 10px 12px; color: var(--dim);
+  }
+  .composer b { color: var(--muted); font-weight: 500; }
+  .palette { border-top: 1px solid var(--border); padding: 12px 24px 16px; display: flex; gap: 18px; flex-wrap: wrap; }
+  .sw { display: flex; align-items: center; gap: 6px; color: var(--dim); font-size: 11px; }
+  .sw i { width: 14px; height: 14px; border: 1px solid var(--border); display: block; }
+  .type { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="side-head"><b>agents</b><span>3</span></div>
+    <div class="row sel"><i class="dot working"></i><span class="name">Claude Code</span><span class="tag">工作中</span></div>
+    <div class="row"><i class="dot done"></i><span class="name">Codex</span><span class="tag">完成</span></div>
+    <div class="row"><i class="dot blocked"></i><span class="name">OpenCode</span><span class="tag">受阻</span></div>
+    <div class="side-foot">space · workbench</div>
+  </aside>
+  <main class="main">
+    <div class="tabs">
+      <div class="tab active">chat</div>
+      <div class="tab">files</div>
+      <div class="tab">changes</div>
+      <div class="tab">plans</div>
+    </div>
+    <div class="msgs">
+      <div class="bubble">
+        <div class="meta">coordinator · 10:24</div>
+        任务卡已冻结：支付幂等键。scope 与验收命令见卡。
+      </div>
+      <div class="bubble me">
+        <div class="meta">you · 10:25</div>
+        开工。先跑 preflight。
+      </div>
+      <div class="bubble">
+        <div class="meta">claude · 10:26</div>
+        <span class="type">✓</span> preflight payment · exit 0<br>
+        <span class="type">→</span> 下一个动作：生成 evidence 并提交 records
+      </div>
+    </div>
+    <div class="composer"><b>&gt;</b> 输入指令…</div>
+    <div class="palette">
+      <span class="sw"><i style="background:var(--canvas)"></i>canvas</span>
+      <span class="sw"><i style="background:var(--chrome)"></i>chrome</span>
+      <span class="sw"><i style="background:var(--raised)"></i>raised</span>
+      <span class="sw"><i style="background:var(--hover)"></i>hover</span>
+      <span class="sw"><i style="background:var(--selected)"></i>selected</span>
+      <span class="sw"><i style="background:var(--border)"></i>border</span>
+      <span class="sw"><i style="background:var(--muted)"></i>muted</span>
+      <span class="sw"><i style="background:var(--dim)"></i>dim</span>
+      <span class="sw"><i style="background:var(--accent)"></i>accent</span>
+      <span class="sw"><i style="background:var(--working)"></i>working</span>
+      <span class="sw"><i style="background:var(--done)"></i>done</span>
+      <span class="sw"><i style="background:var(--blocked)"></i>blocked</span>
+    </div>
+  </main>
+</div>
+</body>
+</html>
