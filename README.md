@@ -5,11 +5,10 @@
 这个仓库记录 **Herdr 当前实际启用的界面风格**：
 
 - 布局：`agents-order`（当前 active layout）
-- 主题：未显式指定 → 按外观使用内置 `paper`（浅色）/ `graphite`（深色）；当前系统为浅色
-- 字体：Maple Mono NF CN（UI + 终端，连字关闭）
-- 外壳：内置 `workspace-chrome / spaces / tabs / pane / workspace-status` mods
+- 主题：未显式指定 → 按外观使用内置 `paper`（浅色）/ `graphite`（深色）；当前外壳 `appearance: "light"`
+- 字体：Maple Mono NF CN（UI + 终端，连字关闭，`font_size: 15`）
+- 外壳：内置 `workspace-chrome / spaces / tabs / pane / workspace-status` mods；侧栏任务区是本仓库收录的自定义 `agents-order` mod
 
-> 更正：此前归档的 `flockbook` 主题不是当前启用的风格，已从本仓库移除。
 
 ![titlebar](screenshots/current-titlebar.png)
 
@@ -21,31 +20,53 @@
 |---|---|---|
 | layout | `agents-order` | `~/.config/herdr-app/shared.json` |
 | theme | 未设置 → `paper`（Light）/ `graphite`（Dark） | settings.json 无 theme，layout 无 theme |
-| 字体 | Maple Mono NF CN，`font_ligatures: false` | settings.json |
-| 明暗 | 跟随系统（当前 Light） | macOS 外观 |
+| 明暗 | `appearance: "light"`（显式设置，不跟随系统） | settings.json |
+| 字体 | Maple Mono NF CN，`font_ligatures: false`，`font_size: 15` | settings.json |
+| 排序 | `agents.sort: "grouped"`（按 Space 分组） | shared.json |
 
 ## 复现
 
+前提：Herdr 应用、`herdr-app` 与 `hc` CLI、Node.js（含 `node --test`）。会话身份核验依赖 macOS 的 `lsof` / `ps`；Linux 需自行核对路径，Windows 未验证。
+
 ```bash
+# 1. 自定义侧栏 mod（本仓库收录的源码）
+mkdir -p ~/.config/herdr-app/mods/agents-order
+cp -R mods/agents-order/. ~/.config/herdr-app/mods/agents-order/
+
+# 2. 布局与分组偏好
 cp layout/agents-order.json ~/.config/herdr-app/layouts/
+# shared.json 中设置 "agents.sort": "grouped"
+
+# 3. 字体与明暗
+# settings.json 中设置 ui_font / font / font_ligatures / appearance（见下）
+
+# 4. 切换并检查
 herdr-app do layout.switch --name agents-order
+herdr-app check mods/agents-order
 ```
 
-字体（`~/.config/herdr-app/settings.json`）：
+字体与明暗（`~/.config/herdr-app/settings.json`）：
 
 ```json
 {
   "ui_font": "Maple Mono NF CN",
   "font": "Maple Mono NF CN",
-  "font_ligatures": false
+  "font_ligatures": false,
+  "font_size": 15,
+  "appearance": "light"
 }
 ```
-
-如需固定明暗主题，可在 layout 或 settings 中显式指定：
 
 ```json
 "theme": { "light": "paper", "dark": "graphite" }
 ```
+
+## 运行时依赖（侧栏功能）
+
+- **待办 / 待审**：读取 `~/ai/collab/pending.md`（Markdown 账本，表头与解析约定见 `mods/agents-order/todo.js`）；文件缺失时侧栏显示为空，不报错。
+- **来源跳转**：点击待办前用 `hc get` + `mods/agents-order/session.mjs` 核验终端与会话身份；核验失败保留事项但拒绝跳转。
+- **自动命名**：只读终端标题元数据（不读对话正文、不调模型），人工名 `workbench.name.source=manual` 永不覆盖；自动名写 `source=auto`，标题不可靠时保持未命名。
+- **测试**：`node --test tests/*.test.mjs`（仅 Node 内置模块，无 npm 依赖）。
 
 ## 布局指标
 
@@ -55,7 +76,7 @@ herdr-app do layout.switch --name agents-order
 |---|---|
 | 标题栏 | 无（`titlebar: none`） |
 | 窗口控件偏移 | `[12, 16]` |
-| 侧栏宽 | `268px`（可调 `44–480`） |
+| 侧栏宽 | 展开 `268px`；`resizable: false`（鼠标不可拖宽，折叠后为 `44px`，由侧栏按钮切换） |
 | 侧栏背景 | `chrome` |
 | 品牌行 | `46px`（`workspace-chrome`） |
 | 标签栏 | `42px` |
@@ -85,6 +106,9 @@ herdr-app do layout.switch --name agents-order
 
 ```
 layout/agents-order.json   当前使用的布局（风格的结构性来源）
+mods/agents-order/         自定义侧栏 mod：分组/拖动/命名/待办/来源跳转/父子树
+tests/                     侧栏行为回归（node --test，仅内置模块）
+scripts/dev/todo-ledger.mjs 待办来源只读查询工具
 tokens/tokens.json         采样 token（机器可读）
 tokens/tokens.md           token 说明与采样方法
 docs/style.md              当前风格的规则与反例
@@ -94,5 +118,6 @@ screenshots/               真实界面裁剪：窗口标题/标签栏、侧栏
 ## 说明
 
 - 截图来自当前运行窗口的裁剪（标题栏 + 侧栏），**不含对话正文、本地路径与会话 ID**。
-- 本仓库不包含 Herdr 应用本体与内置 mods 的源码。
+- 本仓库包含自定义 `mods/agents-order` 源码与测试；不包含 Herdr 应用本体与内置 mods 的源码。
+- 仓库只保留当前 `agents-order` 布局及其所需资产；其他历史布局变体不再收录。
 - 文档、token 与截图：MIT（见 [LICENSE](LICENSE)）。
